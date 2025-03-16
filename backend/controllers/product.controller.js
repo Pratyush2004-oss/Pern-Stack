@@ -1,4 +1,4 @@
-import { sql } from "../config/db";
+import { sql } from "../config/db.js";
 
 // create product
 export const createProduct = async (req, res, next) => {
@@ -49,11 +49,11 @@ export const getAllProducts = async (req, res, next) => {
 
 // get single product
 export const getSingleProduct = async (req, res, next) => {
-    const { productId } = req.params;
+    const { id } = req.params;
     try {
         const product = await sql`
         SELECT * FROM products
-        WHERE id = ${productId}
+        WHERE id = ${id}
         `
         res.status(200).json({
             success: true,
@@ -68,14 +68,24 @@ export const getSingleProduct = async (req, res, next) => {
 
 // update product
 export const updateProduct = async (req, res, next) => {
-    const { productId } = req.params;
+    const { id } = req.params;
     const { name, image, description, price } = req.body;
 
     try {
+        const product = await sql`
+        SELECT * FROM products
+        WHERE id = ${id}
+        `
+        if (product.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found"
+            })
+        }
         const updatedProduct = await sql`
         UPDATE products
-        SET name = ${name}, image = ${image}, description = ${description}, price = ${price}
-        WHERE id = ${productId}
+        SET name = ${name || product[0].name}, image = ${image || product[0].image}, description = ${description || product[0].description}, price = ${price || product[0].price}
+        WHERE id = ${id}
         RETURNING *
         `
 
@@ -101,11 +111,11 @@ export const updateProduct = async (req, res, next) => {
 
 // delete product
 export const deleteProduct = async (req, res, next) => {
-    const { productId } = req.params;
+    const { id } = req.params;
     try {
         const deletedProduct = await sql`
         DELETE FROM products
-        WHERE id = ${productId}
+        WHERE id = ${id}
         RETURNING *
         `
         if (deletedProduct.length === 0) {
