@@ -27,7 +27,7 @@ const ProductCard = ({ product }) => {
             </div>
 
             <div className='card-actions justify-end mt-4 mr-4'>
-                <Link to={'/products/' + product.id} className='btn btn-info btn-sm '>
+                <Link to={'/products/' + product.id} className='btn btn-info btn-sm btn-outline'>
                     <EditIcon className='size-5' />
                 </Link>
                 {/* You can open the modal using document.getElementById('ID').showModal() method */}

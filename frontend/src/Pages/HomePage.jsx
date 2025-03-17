@@ -10,11 +10,6 @@ const HomePage = () => {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
-  if (loading) return (
-    <div className='flex justify-center items-center h-64'>
-      <div className='loading loading-bars loading-xl' />
-    </div>
-  );
   return products && (
     <main className='mx-auto px-10 py-8 max-w-6xl'>
       <div className='flex justify-between items-center mb-8'>
@@ -24,7 +19,7 @@ const HomePage = () => {
       {error && <div className='alert alert-error mb-8'>{error}</div>}
 
       {
-        products.length > 0 && !loading && (
+        products.length === 0 && !loading && !error && (
           <div className='flex flex-col justify-center items-center h-96 space-y-4'>
             <div className='bg-base-100 rounded-full p-6'>
               <PackageIcon className='size-12' />
@@ -36,8 +31,17 @@ const HomePage = () => {
           </div>
         )
       }
+
+      {
+        loading && (
+          <div className='flex justify-center items-center h-64'>
+            <div className='loading loading-bars loading-xl' />
+          </div>
+
+        )
+      }
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {products.map((product, index) => (
+        {!loading && products.map((product, index) => (
           <ProductCard key={index} product={product} />
         ))}
       </div>

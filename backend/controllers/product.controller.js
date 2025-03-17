@@ -72,19 +72,9 @@ export const updateProduct = async (req, res, next) => {
     const { name, image, description, price } = req.body;
 
     try {
-        const product = await sql`
-        SELECT * FROM products
-        WHERE id = ${id}
-        `
-        if (product.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found"
-            })
-        }
         const updatedProduct = await sql`
         UPDATE products
-        SET name = ${name || product[0].name}, image = ${image || product[0].image}, description = ${description || product[0].description}, price = ${price || product[0].price}
+        SET name = ${name}, image = ${image}, description = ${description}, price = ${price}
         WHERE id = ${id}
         RETURNING *
         `

@@ -17,22 +17,30 @@ export const useProductStore = create((set, get) => ({
         price: 0
     },
 
+    // ssetting the value of formData
     setFormData: (formData) => {
         set({ formData });
     },
 
+    // resetting the input form 
     resetForm: () => set({ formData: { name: "", image: "", description: "", price: 0 } }),
 
+    // adding Product to our inventory
     addProduct: async (e) => {
         e.preventDefault();
         set({ loading: true });
         try {
             const { formData } = get();
-            await axios.post(`${BASE_URL}/products`, formData);
+            const response = await axios.post(`${BASE_URL}/products`, formData);
+            if (response.data.success === false) {
+                toast.error(response.data.message)
+                return
+            }
             await get().fetchProducts();
             get().resetForm();
             toast.success("Product added successfully")
         } catch (error) {
+            console.log(error)
             if (error.status === 429) {
                 toast.error("Too Many Requests")
                 set({ error: "Too Many Requests", products: [] })
@@ -46,6 +54,7 @@ export const useProductStore = create((set, get) => ({
         }
     },
 
+    // fetching all the products
     fetchProducts: async () => {
         set({ loading: true })
         try {
@@ -64,6 +73,7 @@ export const useProductStore = create((set, get) => ({
         }
     },
 
+    // deleting a product
     deleteProduct: async (id) => {
         set({ loading: true })
         try {
@@ -84,5 +94,53 @@ export const useProductStore = create((set, get) => ({
             set({ loading: false })
         }
     },
+
+    // getting a single product
+    getSingleProduct: async (id) => {
+        set({ loading: true })
+        try {
+            const response = await axios.get(`${BASE_URL}/products/${id}`);
+            set({ selectedProduct: response.data.data, error: null, formData: response.data.data });
+        } catch (error) {
+            if (error.status === 429) {
+                toast.error("Too Many Requests")
+                set({ error: "Too Many Requests", selectedProduct: null })
+            }
+            else {
+                toast.error("Something went wrong")
+                set({ error: "Something went wrong", selectedProduct: null })
+            }
+        }
+        finally {
+            set({ loading: false })
+        }
+    },
+
+    // updating a product
+    updateProduct: async (id) => {
+        set({ loading: true })
+        try {
+            const { formData } = get();
+            const response = await axios.put(`${BASE_URL}/products/${id}`, formData);
+            if (response.data.success === false) {
+                toast.error(response.data.message)
+                return
+            }
+            set({ selectedProduct: response.data.data, error: null });
+            toast.success("Product updated successfully")
+        } catch (error) {
+            if (error.status === 429) {
+                toast.error("Too Many Requests")
+                set({ error: "Too Many Requests", products: [] })
+            }
+            else {
+                toast.error("Something went wrong")
+                set({ error: "Something went wrong", products: [] })
+            }
+        }
+        finally {
+            set({ loading: false })
+        }
+    }
 
 }))
